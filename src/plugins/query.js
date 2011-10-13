@@ -29,11 +29,17 @@ Lawnchair.plugin((function(){
             var args = [].slice.call(arguments)
             ,   tmpl = args.shift()
             ,   last = args[args.length - 1]
-            ,   qs   = tmpl.match(/\?/g)
-            ,   q    = qs && qs.length > 0 ? interpolate(tmpl, args.slice(0, qs.length)) : tmpl
-            ,   is   = new Function(this.record, 'return !!(' + q + ')')
-            ,   r    = []
+            ,   is
+            ,   r = []
             ,   cb
+            // if the first argument is a function use it to test the records, otherwise generate a function
+            if (Object.prototype.toString.call(tmpl) === '[object Function]'){
+                is = tmpl;
+            } else {
+                var  qs   = tmpl.match(/\?/g)
+                ,    q    = qs && qs.length > 0 ? interpolate(tmpl, args.slice(0, qs.length)) : tmpl
+                is   = new Function(this.record, 'return !!(' + q + ')')
+            }
             // iterate the entire collection
             // TODO should we allow for chained where() to filter __results? (I'm thinking no b/c creates funny behvaiors w/ callbacks)
             this.all(function(all){
